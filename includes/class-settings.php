@@ -213,7 +213,7 @@ class AIC_Settings {
             <h2>扫描现有图片</h2>
             <form method="post" action="">
                 <?php wp_nonce_field('scan_images_nonce', 'scan_images_nonce'); ?>
-                <p>点击下面的按钮扫描媒体库中的勾选非WebP格式图片：</p>
+                <p>点击下面的按钮扫描媒体库中需要转换格式的图片：</p>
                 <input type="submit" name="scan_images" class="button button-primary" value="开始扫描" />
             </form>
 
@@ -226,22 +226,31 @@ class AIC_Settings {
                 ?>
                 <div class="scan-results" style="margin-top: 20px;">
                     <h3>扫描结果</h3>
-                    <p>找到 <span id="total-images"><?php echo $total_images; ?></span> 个勾选非WebP格式的图片：</p>
+                    <p>转换 <span id="total-images"><?php echo $total_images; ?></span> 个图片到WebP格式：</p>
                     <?php if (!empty($scan_results)): ?>
+                        <div style="margin-bottom: 10px;">
+                            <label><input type="checkbox" id="select-all-dirs" checked> 全选所有</label>
+                        </div>
                         <div style="max-height: 400px; overflow-y: auto; padding: 10px; background: #f9f9f9; border: 1px solid #ddd;">
                             <ul style="margin: 0;" id="dir-list">
                                 <?php foreach ($scan_results as $path => $images): ?>
                                     <?php $dir_count = count($images); ?>
                                     <li class="dir-item" style="margin-bottom: 10px; border: 1px solid #eee; background: #fff; padding: 10px;">
-                                        <div class="dir-header" style="font-weight: bold; cursor: pointer; display: flex; justify-content: space-between;" onclick="jQuery(this).next('.image-list').slideToggle();">
-                                            <span class="dir-path">📁 <?php echo esc_html($path); ?></span>
-                                            <span class="dir-progress js-dir-progress" data-total="<?php echo esc_attr($dir_count); ?>" data-remaining="<?php echo esc_attr($dir_count); ?>">
-                                                剩余: <span class="remaining-count"><?php echo esc_html($dir_count); ?></span> / <?php echo esc_html($dir_count); ?>
-                                            </span>
+                                        <div class="dir-header" style="font-weight: bold; display: flex; align-items: center;">
+                                            <input type="checkbox" class="dir-checkbox" checked style="margin-right: 10px;">
+                                            <div style="flex-grow: 1; cursor: pointer; display: flex; justify-content: space-between;" onclick="jQuery(this).parent().next('.image-list').slideToggle();">
+                                                <span class="dir-path">📁 <?php echo esc_html($path); ?></span>
+                                                <span class="dir-progress js-dir-progress" data-total="<?php echo esc_attr($dir_count); ?>" data-remaining="<?php echo esc_attr($dir_count); ?>">
+                                                    剩余: <span class="remaining-count"><?php echo esc_html($dir_count); ?></span> / <?php echo esc_html($dir_count); ?>
+                                                </span>
+                                            </div>
                                         </div>
-                                        <ul class="image-list js-image-list" style="margin: 10px 0 0 20px; display: none;">
+                                        <ul class="image-list js-image-list" style="margin: 10px 0 0 35px; display: none;">
                                             <?php foreach ($images as $attachment_id => $image): ?>
-                                                <li class="image-item" data-id="<?php echo esc_attr($attachment_id); ?>"><?php echo esc_html($image); ?></li>
+                                                <li class="image-item" data-id="<?php echo esc_attr($attachment_id); ?>" style="display: flex; align-items: center; margin-bottom: 4px;">
+                                                    <input type="checkbox" class="image-checkbox" checked style="margin-right: 8px;">
+                                                    <span><?php echo esc_html($image); ?></span>
+                                                </li>
                                             <?php endforeach; ?>
                                         </ul>
                                     </li>
@@ -250,7 +259,7 @@ class AIC_Settings {
                         </div>
 
                         <div style="margin-top: 20px;">
-                            <button type="button" id="batch-convert-btn" class="button button-primary">批量转换为WebP</button>
+                            <button type="button" id="batch-convert-btn" class="button button-primary">开始批量转换格式</button>
                             <div id="conversion-progress" style="display: none; margin-top: 15px;">
                                 <div class="progress" style="background: #f0f0f0; border: 1px solid #ddd; height: 30px; border-radius: 3px; overflow: hidden;">
                                     <div id="progress-bar" style="background: #2271b1; height: 100%; width: 0%; transition: width 0.3s; line-height: 30px; text-align: center; color: white; font-weight: bold;">0%</div>
