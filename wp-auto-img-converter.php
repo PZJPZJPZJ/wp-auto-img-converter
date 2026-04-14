@@ -2,8 +2,8 @@
 /**
  * Plugin Name: WP Auto Img Converter
  * Description: Automatically converts and compresses images to WebP format during upload process, avoiding complex redirects to enhance website loading speed and performance.
- * Version: 1.0.9
- * Author: AzzDev
+ * Version: 1.1.0
+ * Author: Azz
  * Requires PHP: 7.4
  * Requires at least: 6.7
  * Text Domain: wp-auto-img-converter
