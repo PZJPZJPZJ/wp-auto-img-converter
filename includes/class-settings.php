@@ -176,7 +176,7 @@ class AIC_Settings {
             'aic-batch-convert',
             plugin_dir_url(dirname(__FILE__)) . 'assets/js/batch-convert.js',
             array('jquery'),
-            '1.0.0',
+            time(),
             true
         );
 
@@ -218,18 +218,37 @@ class AIC_Settings {
             </form>
 
             <?php if (isset($scan_results)): ?>
+                <?php
+                $total_images = 0;
+                foreach ($scan_results as $path => $images) {
+                    $total_images += count($images);
+                }
+                ?>
                 <div class="scan-results" style="margin-top: 20px;">
                     <h3>扫描结果</h3>
-                    <p>找到 <span id="total-images"><?php echo count($scan_results); ?></span> 个勾选非WebP格式的图片：</p>
+                    <p>找到 <span id="total-images"><?php echo $total_images; ?></span> 个勾选非WebP格式的图片：</p>
                     <?php if (!empty($scan_results)): ?>
-                        <div style="max-height: 300px; overflow-y: auto; padding: 10px; background: #f9f9f9; border: 1px solid #ddd;">
-                            <ul style="margin: 0;" id="image-list">
-                                <?php foreach ($scan_results as $attachment_id => $image): ?>
-                                    <li data-id="<?php echo esc_attr($attachment_id); ?>"><?php echo esc_html($image); ?></li>
+                        <div style="max-height: 400px; overflow-y: auto; padding: 10px; background: #f9f9f9; border: 1px solid #ddd;">
+                            <ul style="margin: 0;" id="dir-list">
+                                <?php foreach ($scan_results as $path => $images): ?>
+                                    <?php $dir_count = count($images); ?>
+                                    <li class="dir-item" style="margin-bottom: 10px; border: 1px solid #eee; background: #fff; padding: 10px;">
+                                        <div class="dir-header" style="font-weight: bold; cursor: pointer; display: flex; justify-content: space-between;" onclick="jQuery(this).next('.image-list').slideToggle();">
+                                            <span class="dir-path">📁 <?php echo esc_html($path); ?></span>
+                                            <span class="dir-progress js-dir-progress" data-total="<?php echo esc_attr($dir_count); ?>" data-remaining="<?php echo esc_attr($dir_count); ?>">
+                                                剩余: <span class="remaining-count"><?php echo esc_html($dir_count); ?></span> / <?php echo esc_html($dir_count); ?>
+                                            </span>
+                                        </div>
+                                        <ul class="image-list js-image-list" style="margin: 10px 0 0 20px; display: none;">
+                                            <?php foreach ($images as $attachment_id => $image): ?>
+                                                <li class="image-item" data-id="<?php echo esc_attr($attachment_id); ?>"><?php echo esc_html($image); ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>
-                        
+
                         <div style="margin-top: 20px;">
                             <button type="button" id="batch-convert-btn" class="button button-primary">批量转换为WebP</button>
                             <div id="conversion-progress" style="display: none; margin-top: 15px;">

@@ -48,21 +48,33 @@ class AIC_Scanner {
         
         $query = new WP_Query($query_args);
         $attachment_ids = $query->posts;
-        
+
         $non_webp_images = array();
-        
+        $upload_dir = wp_upload_dir();
+        $base_dir = wp_normalize_path($upload_dir['basedir']);
+
         if ($attachment_ids) {
             foreach ($attachment_ids as $attachment_id) {
                 // 使用WordPress函数获取附件信息
                 $file_path = get_attached_file($attachment_id);
                 $file_name = basename($file_path);
-                
+
                 if ($file_path) {
                     // 检查是否已经存在对应的WebP文件
                     $webp_path = preg_replace('/\.(jpe?g|png|gif)$/i', '.webp', $file_path);
-                    
+
                     if (!file_exists($webp_path)) {
-                        $non_webp_images[$attachment_id] = $file_name;
+                        $norm_path = wp_normalize_path($file_path);
+                        $rel_path = dirname(str_replace($base_dir, '', $norm_path));
+                        $rel_path = ltrim($rel_path, '/');
+                        if (empty($rel_path) || $rel_path === '.') {
+                            $rel_path = '根目录';
+                        }
+
+                        if (!isset($non_webp_images[$rel_path])) {
+                            $non_webp_images[$rel_path] = array();
+                        }
+                        $non_webp_images[$rel_path][$attachment_id] = $file_name;
                     }
                 }
             }

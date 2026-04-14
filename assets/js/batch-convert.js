@@ -1,15 +1,15 @@
 /**
  * 批量转换前端脚本
- * 
+ *
  * 处理批量转换的用户交互和AJAX请求
  */
 
 jQuery(document).ready(function($) {
     $('#batch-convert-btn').on('click', function() {
         var btn = $(this);
-        
-        var imageList = $('#image-list li');
-        var totalImages = imageList.length;
+
+        var imageListItems = $('.image-item');
+        var totalImages = imageListItems.length;
         var converted = 0;
         var failed = 0;
 
@@ -28,26 +28,33 @@ jQuery(document).ready(function($) {
             if (index >= totalImages) {
                 $('#progress-text').html('<strong style="color: green;">转换完成！</strong> 成功: ' + converted + ', 失败: ' + failed);
                 btn.prop('disabled', false);
-                
-                // 移除已转换成功的项目
-                $('#image-list li').each(function() {
+
+                // 移除已转换成功的项目和空文件夹
+                $('.image-item').each(function() {
                     if ($(this).css('color') === 'rgb(0, 128, 0)' || $(this).css('color') === 'green') {
                         $(this).remove();
                     }
                 });
-                
+
+                $('.dir-item').each(function() {
+                    var remainingItems = $(this).find('.image-item').length;
+                    if (remainingItems === 0) {
+                        $(this).remove();
+                    }
+                });
+
                 // 更新计数
-                var remaining = $('#image-list li').length;
+                var remaining = $('.image-item').length;
                 $('#total-images').text(remaining);
-                
+
                 if (remaining === 0) {
-                    $('#image-list').parent().html('<p style="color: green; font-weight: bold;">所有图片已成功转换为WebP格式！</p>');
+                    $('#dir-list').parent().html('<p style="color: green; font-weight: bold;">所有图片已成功转换为WebP格式！</p>');
                 }
-                
+
                 return;
             }
 
-            var currentItem = imageList.eq(index);
+            var currentItem = imageListItems.eq(index);
             var attachmentId = currentItem.data('id');
             var fileName = currentItem.text();
 
@@ -65,6 +72,14 @@ jQuery(document).ready(function($) {
                     if (response.success) {
                         converted++;
                         currentItem.css('color', 'green').append(' ✓');
+
+                        // 更新当前文件夹统计
+                        var dirItem = currentItem.closest('.dir-item');
+                        var dirProgress = dirItem.find('.js-dir-progress');
+                        var remaining = parseInt(dirProgress.attr('data-remaining')) - 1;
+                        dirProgress.attr('data-remaining', remaining);
+                        dirItem.find('.remaining-count').text(remaining);
+
                     } else {
                         failed++;
                         currentItem.css('color', 'red').append(' ✗ (' + (response.data || '失败') + ')');
