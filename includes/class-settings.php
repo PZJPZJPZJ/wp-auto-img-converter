@@ -81,7 +81,7 @@ class AIC_Settings {
         
         add_settings_field(
             'aic_quality',
-            'WebP 图片质量',
+            '图片质量',
             array($this, 'quality_field_callback'),
             'auto-img-converter',
             'aic_main_section'
